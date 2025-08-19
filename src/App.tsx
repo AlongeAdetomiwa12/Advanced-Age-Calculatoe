@@ -165,6 +165,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('About Tool');
   const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [fadeOutTimeout, setFadeOutTimeout] = useState<NodeJS.Timeout | null>(null);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
 
   const tabs = ['About Tool', 'Basic Operations', 'Special Functions', 'Keyboard Shortcuts', 'Responsive Design'];
@@ -202,7 +203,33 @@ function App() {
       clearTimeout(dropdownTimeout);
       setDropdownTimeout(null);
     }
-    setShowCalculatorDropdown(false);
+    
+    // Add 1 second delay before hiding dropdown
+    const fadeTimeout = setTimeout(() => {
+      setShowCalculatorDropdown(false);
+    }, 1000);
+    setFadeOutTimeout(fadeTimeout);
+  };
+
+  const handleDropdownContentEnter = () => {
+    // Clear both timeouts when entering dropdown content
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+      setDropdownTimeout(null);
+    }
+    if (fadeOutTimeout) {
+      clearTimeout(fadeOutTimeout);
+      setFadeOutTimeout(null);
+    }
+    setShowCalculatorDropdown(true);
+  };
+
+  const handleDropdownContentLeave = () => {
+    // Add 1 second delay before hiding dropdown when leaving content
+    const fadeTimeout = setTimeout(() => {
+      setShowCalculatorDropdown(false);
+    }, 1000);
+    setFadeOutTimeout(fadeTimeout);
   };
 
   const getZodiacSign = (month: number, day: number): string => {
@@ -312,14 +339,8 @@ function App() {
               
               {showCalculatorDropdown && (
                 <div
-                  onMouseEnter={() => {
-                    if (dropdownTimeout) {
-                      clearTimeout(dropdownTimeout);
-                      setDropdownTimeout(null);
-                    }
-                    setShowCalculatorDropdown(true);
-                  }}
-                  onMouseLeave={handleDropdownLeave}
+                  onMouseEnter={handleDropdownContentEnter}
+                  onMouseLeave={handleDropdownContentLeave}
                   className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50"
                 >
                   <div className="p-6">
