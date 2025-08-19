@@ -164,6 +164,7 @@ function App() {
   const [compareToAnother, setCompareToAnother] = useState(false);
   const [activeTab, setActiveTab] = useState('About Tool');
   const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
+  const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
 
   const tabs = ['About Tool', 'Basic Operations', 'Special Functions', 'Keyboard Shortcuts', 'Responsive Design'];
@@ -186,6 +187,24 @@ function App() {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 120 }, (_, i) => (currentYear - i).toString());
 
+  const handleDropdownEnter = () => {
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setShowCalculatorDropdown(true);
+    }, 2500);
+    setDropdownTimeout(timeout);
+  };
+
+  const handleDropdownLeave = () => {
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+      setDropdownTimeout(null);
+    }
+    setShowCalculatorDropdown(false);
+  };
+
   const getZodiacSign = (month: number, day: number): string => {
     for (const sign of zodiacSigns) {
       const [startMonth, startDay] = sign.start;
@@ -202,6 +221,11 @@ function App() {
   };
 
   const calculateAge = () => {
+    if (!selectedDay || !selectedMonth || !selectedYear) {
+      alert('Please enter a valid birth date!');
+      return;
+    }
+    
     const birthDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, parseInt(selectedDay));
     const today = new Date();
     
@@ -277,8 +301,8 @@ function App() {
             {/* Calculator Dropdown */}
             <div className="relative">
               <button
-                onMouseEnter={() => setShowCalculatorDropdown(true)}
-                onMouseLeave={() => setShowCalculatorDropdown(false)}
+                onMouseEnter={handleDropdownEnter}
+                onMouseLeave={handleDropdownLeave}
                 className="flex items-center space-x-2 px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
               >
                 <Calculator className="w-5 h-5" />
@@ -288,8 +312,14 @@ function App() {
               
               {showCalculatorDropdown && (
                 <div
-                  onMouseEnter={() => setShowCalculatorDropdown(true)}
-                  onMouseLeave={() => setShowCalculatorDropdown(false)}
+                  onMouseEnter={() => {
+                    if (dropdownTimeout) {
+                      clearTimeout(dropdownTimeout);
+                      setDropdownTimeout(null);
+                    }
+                    setShowCalculatorDropdown(true);
+                  }}
+                  onMouseLeave={handleDropdownLeave}
                   className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50"
                 >
                   <div className="p-6">
@@ -371,50 +401,56 @@ function App() {
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
-                    <div className="relative">
-                      <select
-                        value={selectedDay}
-                        onChange={(e) => setSelectedDay(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
-                      >
-                        {days.map((day) => (
-                          <option key={day} value={day}>{day}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={selectedDay}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 31)) {
+                          setSelectedDay(value);
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                      placeholder="Day"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Month</label>
-                    <div className="relative">
-                      <select
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
-                      >
-                        {months.map((month) => (
-                          <option key={month.value} value={month.value}>{month.label}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      value={selectedMonth}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || (parseInt(value) >= 1 && parseInt(value) <= 12)) {
+                          setSelectedMonth(value);
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                      placeholder="Month"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
-                    <div className="relative">
-                      <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
-                      >
-                        {years.map((year) => (
-                          <option key={year} value={year}>{year}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                    </div>
+                    <input
+                      type="number"
+                      min="1900"
+                      max={currentYear}
+                      value={selectedYear}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || (parseInt(value) >= 1900 && parseInt(value) <= currentYear)) {
+                          setSelectedYear(value);
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                      placeholder="Year"
+                    />
                   </div>
                 </div>
 
