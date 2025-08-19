@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Calculator, Clock, Star, Gift, ChevronDown, Menu, X } from 'lucide-react';
+import { Calendar, Calculator, Clock, Star, Gift, ChevronDown } from 'lucide-react';
 
 interface AgeResult {
   years: number;
@@ -163,7 +163,7 @@ function App() {
   const [selectedYear, setSelectedYear] = useState('1990');
   const [compareToAnother, setCompareToAnother] = useState(false);
   const [activeTab, setActiveTab] = useState('About Tool');
-  const [showCalculators, setShowCalculators] = useState(false);
+  const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
 
   const tabs = ['About Tool', 'Basic Operations', 'Special Functions', 'Keyboard Shortcuts', 'Responsive Design'];
@@ -273,57 +273,50 @@ function App() {
               <Calculator className="w-8 h-8 text-purple-400" />
               <h1 className="text-xl font-bold text-white">Advanced Calculator Suite</h1>
             </div>
-            <button
-              onClick={() => setShowCalculators(!showCalculators)}
-              className="lg:hidden p-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
-            >
-              {showCalculators ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            
+            {/* Calculator Dropdown */}
+            <div className="relative">
+              <button
+                onMouseEnter={() => setShowCalculatorDropdown(true)}
+                onMouseLeave={() => setShowCalculatorDropdown(false)}
+                className="flex items-center space-x-2 px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
+              >
+                <Calculator className="w-5 h-5" />
+                <span>Calculators</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              
+              {showCalculatorDropdown && (
+                <div
+                  onMouseEnter={() => setShowCalculatorDropdown(true)}
+                  onMouseLeave={() => setShowCalculatorDropdown(false)}
+                  className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50"
+                >
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">Basic Math & Everyday Use</h3>
+                    <div className="grid grid-cols-1 gap-1">
+                      {calculatorTools.map((tool, index) => (
+                        <button
+                          key={index}
+                          className="text-left p-3 text-purple-200 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors text-sm"
+                        >
+                          {tool}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Calculator Menu */}
-      {showCalculators && (
-        <div className="lg:hidden bg-purple-900/95 backdrop-blur-sm border-b border-purple-700/50">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Basic Math & Everyday Use</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {calculatorTools.map((tool, index) => (
-                <button
-                  key={index}
-                  className="text-left p-3 text-purple-200 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors"
-                >
-                  {tool}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Sidebar - Desktop Calculator Menu */}
-          <div className="hidden lg:block lg:col-span-3">
-            <div className="bg-purple-800/30 backdrop-blur-sm rounded-xl p-6 border border-purple-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Basic Math & Everyday Use</h3>
-              <div className="space-y-1">
-                {calculatorTools.map((tool, index) => (
-                  <button
-                    key={index}
-                    className="block w-full text-left p-3 text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-colors text-sm"
-                  >
-                    {tool}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Left Content */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-6">
             {/* Main Heading */}
             <div className="text-center lg:text-left">
               <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
@@ -341,8 +334,8 @@ function App() {
             </div>
 
             {/* Tabs */}
-            <div className="bg-purple-800/30 backdrop-blur-sm rounded-xl border border-purple-700/50 overflow-hidden">
-              <div className="flex overflow-x-auto bg-purple-900/50">
+            <div className="bg-purple-800/30 backdrop-blur-sm rounded-xl border border-purple-700/50">
+              <div className="flex overflow-x-auto bg-purple-900/50 rounded-t-xl">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
@@ -364,7 +357,7 @@ function App() {
           </div>
 
           {/* Right Content - Calculator */}
-          <div className="lg:col-span-4">
+          <div>
             <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden">
               {/* Calculator Header */}
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
