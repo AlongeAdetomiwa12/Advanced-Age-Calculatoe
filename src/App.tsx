@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 import { Calendar, Calculator, Clock, Star, Gift, ChevronDown, ArrowLeft, Plus, Minus, X, Divide, Percent, DollarSign } from 'lucide-react';
+import DiscountCalculator from './components/DiscountCalculator';
+import SalesTaxCalculator from './components/SalesTaxCalculator';
+import UnitPriceCalculator from './components/UnitPriceCalculator';
+import RatioCalculator from './components/RatioCalculator';
+import FractionToDecimalConverter from './components/FractionToDecimalConverter';
+import DecimalToFractionConverter from './components/DecimalToFractionConverter';
+import PercentageChangeCalculator from './components/PercentageChangeCalculator';
+import AverageCalculator from './components/AverageCalculator';
+import GPACalculator from './components/GPACalculator';
+import GradeCalculator from './components/GradeCalculator';
+import SimpleInterestCalculator from './components/SimpleInterestCalculator';
+import CompoundInterestCalculator from './components/CompoundInterestCalculator';
 
 interface AgeResult {
   years: number;
@@ -469,6 +481,30 @@ function App() {
         return <PercentageCalculator />;
       case 'tip':
         return <TipCalculator />;
+      case 'discount':
+        return <DiscountCalculator />;
+      case 'sales-tax':
+        return <SalesTaxCalculator />;
+      case 'unit-price':
+        return <UnitPriceCalculator />;
+      case 'ratio':
+        return <RatioCalculator />;
+      case 'fraction-decimal':
+        return <FractionToDecimalConverter />;
+      case 'decimal-fraction':
+        return <DecimalToFractionConverter />;
+      case 'percentage-change':
+        return <PercentageChangeCalculator />;
+      case 'average':
+        return <AverageCalculator />;
+      case 'gpa':
+        return <GPACalculator />;
+      case 'grade':
+        return <GradeCalculator />;
+      case 'simple-interest':
+        return <SimpleInterestCalculator />;
+      case 'compound-interest':
+        return <CompoundInterestCalculator />;
       default:
         return (
           <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -643,7 +679,7 @@ function App() {
               {/* Calculator Header */}
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
                 <h2 className="text-2xl font-bold mb-2">Modern Age Calculator</h2>
-                <p className="text-purple-100">Discover your exact age in multiple units with our sleek calculator</p>
+                <p className="text-purple-100">Calculate your exact age in years, months, weeks, days, hours, and minutes</p>
               </div>
 
               {/* Calculator Body */}
@@ -725,7 +761,7 @@ function App() {
                   onClick={calculateAge}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors shadow-lg hover:shadow-blue-500/25 flex items-center justify-center space-x-2"
                 >
-                  <Calculator className="w-5 h-5" />
+                  <Calendar className="w-5 h-5" />
                   <span>Calculate Age</span>
                 </button>
 
@@ -765,6 +801,17 @@ function App() {
                         <p className="text-sm text-green-600">{ageResult.nextBirthday.date}</p>
                       </div>
 
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h4 className="font-semibold text-blue-800 mb-3">Age Calculation Formula</h4>
+                        <div className="space-y-2 text-blue-700 text-sm">
+                          <p><strong>Years:</strong> Current Year - Birth Year = {new Date().getFullYear()} - {selectedYear} = {ageResult.years}</p>
+                          <p><strong>Total Months:</strong> (Years × 12) + Month Difference = ({ageResult.years} × 12) + {ageResult.months} = {(ageResult.years * 12) + ageResult.months}</p>
+                          <p><strong>Total Days:</strong> Calculated from exact date difference = {ageResult.days.toLocaleString()}</p>
+                          <p><strong>Hours:</strong> Days × 24 = {ageResult.days.toLocaleString()} × 24 = {ageResult.hours.toLocaleString()}</p>
+                          <p><strong>Minutes:</strong> Hours × 60 = {ageResult.hours.toLocaleString()} × 60 = {ageResult.minutes.toLocaleString()}</p>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200">
                           <div className="flex items-center space-x-2 mb-2">
@@ -798,9 +845,6 @@ function App() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
         }
       `}</style>
     </div>
