@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Calculator, Clock, Star, Gift, ChevronDown } from 'lucide-react';
+import { Calendar, Calculator, Clock, Star, Gift, ChevronDown, ArrowLeft, Plus, Minus, X, Divide, Percent, DollarSign } from 'lucide-react';
 
 interface AgeResult {
   years: number;
@@ -16,24 +16,31 @@ interface AgeResult {
   birthdayDay: string;
 }
 
+interface CalculatorState {
+  display: string;
+  previousValue: number | null;
+  operation: string | null;
+  waitingForOperand: boolean;
+}
+
 const calculatorTools = [
-  'Basic Arithmetic Calculator',
-  'Percentage Calculator', 
-  'Tip Calculator',
-  'Discount Calculator',
-  'Sales Tax Calculator',
-  'Unit Price Calculator',
-  'Ratio Calculator',
-  'Fraction to Decimal Converter',
-  'Decimal to Fraction Converter',
-  'Percentage Increase/Decrease Calculator',
-  'Average Calculator',
-  'GPA Calculator',
-  'Grade Calculator',
-  'Simple Interest Calculator',
-  'Compound Interest Calculator',
-  'Currency Converter',
-  'Time Zone Converter'
+  { name: 'Basic Arithmetic Calculator', id: 'arithmetic' },
+  { name: 'Percentage Calculator', id: 'percentage' },
+  { name: 'Tip Calculator', id: 'tip' },
+  { name: 'Discount Calculator', id: 'discount' },
+  { name: 'Sales Tax Calculator', id: 'sales-tax' },
+  { name: 'Unit Price Calculator', id: 'unit-price' },
+  { name: 'Ratio Calculator', id: 'ratio' },
+  { name: 'Fraction to Decimal Converter', id: 'fraction-decimal' },
+  { name: 'Decimal to Fraction Converter', id: 'decimal-fraction' },
+  { name: 'Percentage Increase/Decrease Calculator', id: 'percentage-change' },
+  { name: 'Average Calculator', id: 'average' },
+  { name: 'GPA Calculator', id: 'gpa' },
+  { name: 'Grade Calculator', id: 'grade' },
+  { name: 'Simple Interest Calculator', id: 'simple-interest' },
+  { name: 'Compound Interest Calculator', id: 'compound-interest' },
+  { name: 'Currency Converter', id: 'currency' },
+  { name: 'Time Zone Converter', id: 'timezone' }
 ];
 
 const zodiacSigns = [
@@ -51,124 +58,264 @@ const zodiacSigns = [
   { name: 'Pisces', start: [2, 19], end: [3, 20] }
 ];
 
-const TabContent = ({ activeTab }: { activeTab: string }) => {
-  const content = {
-    'About Tool': (
-      <div className="space-y-4 text-gray-300">
-        <h3 className="text-lg font-semibold text-white">Precision Age Calculator</h3>
-        <p>Our advanced age calculator provides precise calculations of your age in multiple time units. Get exact measurements in years, months, weeks, days, hours, and minutes with mathematical precision.</p>
-        
-        <h4 className="text-md font-semibold text-white mt-6">Key Features:</h4>
-        <ul className="space-y-2 list-disc list-inside">
-          <li>Zodiac sign revelation based on your birth date</li>
-          <li>Birthday countdown with exact days remaining</li>
-          <li>Multiple time unit calculations simultaneously</li>
-          <li>Clean, modern interface optimized for all devices</li>
-        </ul>
-      </div>
-    ),
-    'Basic Operations': (
-      <div className="space-y-3 text-gray-300">
-        <h3 className="text-lg font-semibold text-white">How to Use</h3>
-        <div className="space-y-3">
-          <div className="flex items-start space-x-3">
-            <span className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span>
-            <p>Select your birth day from the dropdown menu</p>
-          </div>
-          <div className="flex items-start space-x-3">
-            <span className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">2</span>
-            <p>Choose your birth month from the available options</p>
-          </div>
-          <div className="flex items-start space-x-3">
-            <span className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">3</span>
-            <p>Enter your birth year using the dropdown</p>
-          </div>
-          <div className="flex items-start space-x-3">
-            <span className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">4</span>
-            <p>Click "Calculate Age" to get instant results</p>
-          </div>
-        </div>
-      </div>
-    ),
-    'Special Functions': (
-      <div className="space-y-4 text-gray-300">
-        <h3 className="text-lg font-semibold text-white">Advanced Features</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-white mb-2">Date Comparison</h4>
-            <p className="text-sm">Toggle to compare your age to any specific date in the future or past.</p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-white mb-2">Zodiac Detection</h4>
-            <p className="text-sm">Automatically reveals your zodiac sign based on your birth date.</p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-white mb-2">Birthday Countdown</h4>
-            <p className="text-sm">Shows exactly how many days until your next birthday.</p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-semibold text-white mb-2">Multiple Units</h4>
-            <p className="text-sm">View your age in years, months, weeks, days, hours, and minutes.</p>
-          </div>
-        </div>
-      </div>
-    ),
-    'Keyboard Shortcuts': (
-      <div className="space-y-4 text-gray-300">
-        <h3 className="text-lg font-semibold text-white">Keyboard Navigation</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
-            <span>Calculate Age</span>
-            <kbd className="bg-purple-600 text-white px-2 py-1 rounded text-sm">Enter</kbd>
-          </div>
-          <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
-            <span>Navigate Tabs</span>
-            <kbd className="bg-purple-600 text-white px-2 py-1 rounded text-sm">Tab</kbd>
-          </div>
-          <div className="flex items-center justify-between bg-gray-800 p-3 rounded-lg">
-            <span>Open Dropdowns</span>
-            <kbd className="bg-purple-600 text-white px-2 py-1 rounded text-sm">Space</kbd>
-          </div>
-        </div>
-      </div>
-    ),
-    'Responsive Design': (
-      <div className="space-y-4 text-gray-300">
-        <h3 className="text-lg font-semibold text-white">Mobile-First Approach</h3>
-        <p>Our calculator is designed with responsive principles to ensure optimal viewing on all devices:</p>
-        <div className="space-y-3">
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <h4 className="font-semibold text-white">📱 Mobile (320px+)</h4>
-            <p className="text-sm">Single column layout with stacked components</p>
-          </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <h4 className="font-semibold text-white">📟 Tablet (768px+)</h4>
-            <p className="text-sm">Optimized two-column layout with improved spacing</p>
-          </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <h4 className="font-semibold text-white">🖥️ Desktop (1024px+)</h4>
-            <p className="text-sm">Full side-by-side layout with enhanced grid display</p>
-          </div>
-        </div>
-      </div>
-    )
+// Calculator Components
+const ArithmeticCalculator = () => {
+  const [calc, setCalc] = useState<CalculatorState>({
+    display: '0',
+    previousValue: null,
+    operation: null,
+    waitingForOperand: false
+  });
+
+  const inputNumber = (num: string) => {
+    if (calc.waitingForOperand) {
+      setCalc({
+        ...calc,
+        display: num,
+        waitingForOperand: false
+      });
+    } else {
+      setCalc({
+        ...calc,
+        display: calc.display === '0' ? num : calc.display + num
+      });
+    }
   };
 
-  return content[activeTab as keyof typeof content] || content['About Tool'];
+  const inputOperation = (nextOperation: string) => {
+    const inputValue = parseFloat(calc.display);
+
+    if (calc.previousValue === null) {
+      setCalc({
+        ...calc,
+        previousValue: inputValue,
+        waitingForOperand: true,
+        operation: nextOperation
+      });
+    } else if (calc.operation) {
+      const currentValue = calc.previousValue || 0;
+      const newValue = calculate(currentValue, inputValue, calc.operation);
+
+      setCalc({
+        ...calc,
+        display: String(newValue),
+        previousValue: newValue,
+        waitingForOperand: true,
+        operation: nextOperation
+      });
+    }
+  };
+
+  const calculate = (firstValue: number, secondValue: number, operation: string) => {
+    switch (operation) {
+      case '+': return firstValue + secondValue;
+      case '-': return firstValue - secondValue;
+      case '×': return firstValue * secondValue;
+      case '÷': return firstValue / secondValue;
+      case '=': return secondValue;
+      default: return secondValue;
+    }
+  };
+
+  const performCalculation = () => {
+    const inputValue = parseFloat(calc.display);
+
+    if (calc.previousValue !== null && calc.operation) {
+      const newValue = calculate(calc.previousValue, inputValue, calc.operation);
+
+      setCalc({
+        ...calc,
+        display: String(newValue),
+        previousValue: null,
+        operation: null,
+        waitingForOperand: true
+      });
+    }
+  };
+
+  const clear = () => {
+    setCalc({
+      display: '0',
+      previousValue: null,
+      operation: null,
+      waitingForOperand: false
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <div className="mb-4">
+        <div className="bg-gray-100 p-4 rounded-lg text-right text-2xl font-mono">
+          {calc.display}
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        <button onClick={clear} className="col-span-2 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg font-semibold">Clear</button>
+        <button onClick={() => inputOperation('÷')} className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-semibold">÷</button>
+        <button onClick={() => inputOperation('×')} className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-semibold">×</button>
+        
+        {[7, 8, 9].map(num => (
+          <button key={num} onClick={() => inputNumber(String(num))} className="bg-gray-200 hover:bg-gray-300 p-3 rounded-lg font-semibold">{num}</button>
+        ))}
+        <button onClick={() => inputOperation('-')} className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-semibold">-</button>
+        
+        {[4, 5, 6].map(num => (
+          <button key={num} onClick={() => inputNumber(String(num))} className="bg-gray-200 hover:bg-gray-300 p-3 rounded-lg font-semibold">{num}</button>
+        ))}
+        <button onClick={() => inputOperation('+')} className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-semibold">+</button>
+        
+        {[1, 2, 3].map(num => (
+          <button key={num} onClick={() => inputNumber(String(num))} className="bg-gray-200 hover:bg-gray-300 p-3 rounded-lg font-semibold">{num}</button>
+        ))}
+        <button onClick={performCalculation} className="row-span-2 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-semibold">=</button>
+        
+        <button onClick={() => inputNumber('0')} className="col-span-2 bg-gray-200 hover:bg-gray-300 p-3 rounded-lg font-semibold">0</button>
+        <button onClick={() => inputNumber('.')} className="bg-gray-200 hover:bg-gray-300 p-3 rounded-lg font-semibold">.</button>
+      </div>
+    </div>
+  );
+};
+
+const PercentageCalculator = () => {
+  const [value, setValue] = useState('');
+  const [percentage, setPercentage] = useState('');
+  const [result, setResult] = useState<number | null>(null);
+
+  const calculatePercentage = () => {
+    const val = parseFloat(value);
+    const perc = parseFloat(percentage);
+    if (!isNaN(val) && !isNaN(perc)) {
+      setResult((val * perc) / 100);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-semibold mb-4">Percentage Calculator</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Value</label>
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            placeholder="Enter value"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Percentage</label>
+          <input
+            type="number"
+            value={percentage}
+            onChange={(e) => setPercentage(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            placeholder="Enter percentage"
+          />
+        </div>
+        <button
+          onClick={calculatePercentage}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-lg font-semibold"
+        >
+          Calculate
+        </button>
+        {result !== null && (
+          <div className="bg-green-50 p-4 rounded-lg">
+            <p className="text-green-800 font-semibold">Result: {result}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TipCalculator = () => {
+  const [billAmount, setBillAmount] = useState('');
+  const [tipPercentage, setTipPercentage] = useState('15');
+  const [people, setPeople] = useState('1');
+  const [results, setResults] = useState<{tip: number, total: number, perPerson: number} | null>(null);
+
+  const calculateTip = () => {
+    const bill = parseFloat(billAmount);
+    const tip = parseFloat(tipPercentage);
+    const numPeople = parseInt(people);
+    
+    if (!isNaN(bill) && !isNaN(tip) && !isNaN(numPeople) && numPeople > 0) {
+      const tipAmount = (bill * tip) / 100;
+      const total = bill + tipAmount;
+      const perPerson = total / numPeople;
+      
+      setResults({
+        tip: tipAmount,
+        total: total,
+        perPerson: perPerson
+      });
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-lg">
+      <h3 className="text-xl font-semibold mb-4">Tip Calculator</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Bill Amount ($)</label>
+          <input
+            type="number"
+            value={billAmount}
+            onChange={(e) => setBillAmount(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            placeholder="Enter bill amount"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Tip Percentage (%)</label>
+          <input
+            type="number"
+            value={tipPercentage}
+            onChange={(e) => setTipPercentage(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Number of People</label>
+          <input
+            type="number"
+            value={people}
+            onChange={(e) => setPeople(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            min="1"
+          />
+        </div>
+        <button
+          onClick={calculateTip}
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-lg font-semibold"
+        >
+          Calculate Tip
+        </button>
+        {results && (
+          <div className="bg-green-50 p-4 rounded-lg space-y-2">
+            <p className="text-green-800"><span className="font-semibold">Tip Amount:</span> ${results.tip.toFixed(2)}</p>
+            <p className="text-green-800"><span className="font-semibold">Total Amount:</span> ${results.total.toFixed(2)}</p>
+            <p className="text-green-800"><span className="font-semibold">Per Person:</span> ${results.perPerson.toFixed(2)}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 function App() {
+  const [currentPage, setCurrentPage] = useState<'home' | 'calculators'>('home');
+  const [selectedCalculator, setSelectedCalculator] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState('15');
   const [selectedMonth, setSelectedMonth] = useState('6');
   const [selectedYear, setSelectedYear] = useState('1990');
   const [compareToAnother, setCompareToAnother] = useState(false);
-  const [activeTab, setActiveTab] = useState('About Tool');
   const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const [fadeOutTimeout, setFadeOutTimeout] = useState<NodeJS.Timeout | null>(null);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
 
-  const tabs = ['About Tool', 'Basic Operations', 'Special Functions', 'Keyboard Shortcuts', 'Responsive Design'];
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
   const months = [
     { value: '1', label: 'January' },
@@ -194,7 +341,7 @@ function App() {
     }
     const timeout = setTimeout(() => {
       setShowCalculatorDropdown(true);
-    }, 2500);
+    }, 200);
     setDropdownTimeout(timeout);
   };
 
@@ -314,6 +461,106 @@ function App() {
     });
   };
 
+  const renderCalculator = (calculatorId: string) => {
+    switch (calculatorId) {
+      case 'arithmetic':
+        return <ArithmeticCalculator />;
+      case 'percentage':
+        return <PercentageCalculator />;
+      case 'tip':
+        return <TipCalculator />;
+      default:
+        return (
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-xl font-semibold mb-4">Calculator Coming Soon</h3>
+            <p className="text-gray-600">This calculator is under development and will be available soon.</p>
+          </div>
+        );
+    }
+  };
+
+  if (currentPage === 'calculators') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+        {/* Header */}
+        <header className="border-b border-purple-700/50 bg-purple-900/50 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => {
+                    setCurrentPage('home');
+                    setSelectedCalculator(null);
+                  }}
+                  className="flex items-center space-x-2 text-purple-300 hover:text-white"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Back to Home</span>
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Calculator className="w-8 h-8 text-purple-400" />
+                <h1 className="text-xl font-bold text-white">All Calculators</h1>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {!selectedCalculator ? (
+            <div>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+                  Calculator Suite
+                </h1>
+                <p className="text-purple-200 text-lg">
+                  Choose from our comprehensive collection of calculators
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {calculatorTools.map((tool) => (
+                  <button
+                    key={tool.id}
+                    onClick={() => setSelectedCalculator(tool.id)}
+                    className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-left"
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Calculator className="w-6 h-6 text-purple-600" />
+                      <h3 className="font-semibold text-gray-800">{tool.name}</h3>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      Click to use this calculator
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={() => setSelectedCalculator(null)}
+                  className="flex items-center space-x-2 text-purple-300 hover:text-white"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Back to All Calculators</span>
+                </button>
+                <h2 className="text-2xl font-bold text-white">
+                  {calculatorTools.find(tool => tool.id === selectedCalculator)?.name}
+                </h2>
+              </div>
+              
+              <div className="max-w-2xl mx-auto">
+                {renderCalculator(selectedCalculator)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
       {/* Header */}
@@ -341,7 +588,7 @@ function App() {
                 <div
                   onMouseEnter={handleDropdownContentEnter}
                   onMouseLeave={handleDropdownContentLeave}
-                  className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50"
+                  className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50 animate-fadeIn"
                 >
                   <div className="p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">Basic Math & Everyday Use</h3>
@@ -349,9 +596,14 @@ function App() {
                       {calculatorTools.map((tool, index) => (
                         <button
                           key={index}
+                          onClick={() => {
+                            setCurrentPage('calculators');
+                            setSelectedCalculator(tool.id);
+                            setShowCalculatorDropdown(false);
+                          }}
                           className="text-left p-3 text-purple-200 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors text-sm"
                         >
-                          {tool}
+                          {tool.name}
                         </button>
                       ))}
                     </div>
@@ -367,7 +619,7 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Left Content */}
-          <div className="space-y-6">
+          <div>
             {/* Main Heading */}
             <div className="text-center lg:text-left">
               <h1 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
@@ -379,31 +631,9 @@ function App() {
               <p className="text-purple-200 text-lg mb-6 leading-relaxed">
                 Discover your precise age with our advanced calculator that shows your exact age in years, months, weeks, days, hours, and minutes. Get additional insights including zodiac sign and birthday countdown.
               </p>
-              <button className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-purple-500/25">
+              <button onClick={() => setCurrentPage('calculators')} className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-purple-500/25">
                 Explore All Calculators
               </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="bg-purple-800/30 backdrop-blur-sm rounded-xl border border-purple-700/50">
-              <div className="flex overflow-x-auto bg-purple-900/50 rounded-t-xl">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-3 font-medium whitespace-nowrap transition-colors border-b-2 ${
-                      activeTab === tab
-                        ? 'text-white border-purple-400 bg-purple-700/50'
-                        : 'text-purple-300 border-transparent hover:text-white hover:bg-purple-800/50'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-              <div className="p-6">
-                <TabContent activeTab={activeTab} />
-              </div>
             </div>
           </div>
 
@@ -568,6 +798,9 @@ function App() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
         }
       `}</style>
     </div>
