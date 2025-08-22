@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar, Calculator, Clock, Star, Gift, ChevronDown, ArrowLeft, Plus, Minus, X, Divide, Percent, DollarSign } from 'lucide-react';
+import { Calendar, Calculator, Clock, Star, Gift, ChevronDown, ArrowLeft, Plus, Minus, X, Divide, Percent, DollarSign, Shield } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import SignInPage from './components/Auth/SignInPage';
+import AccountDropdown from './components/Header/AccountDropdown';
+import SettingsPage from './components/Settings/SettingsPage';
+import ProfilePage from './components/Profile/ProfilePage';
+import AdminPage from './components/Admin/AdminPage';
 import DiscountCalculator from './components/DiscountCalculator';
 import SalesTaxCalculator from './components/SalesTaxCalculator';
 import UnitPriceCalculator from './components/UnitPriceCalculator';
@@ -12,6 +19,11 @@ import GPACalculator from './components/GPACalculator';
 import GradeCalculator from './components/GradeCalculator';
 import SimpleInterestCalculator from './components/SimpleInterestCalculator';
 import CompoundInterestCalculator from './components/CompoundInterestCalculator';
+import LifeExpectancyCalculator from './components/Calculators/LifeExpectancyCalculator';
+import BiologicalAgeCalculator from './components/Calculators/BiologicalAgeCalculator';
+import PregnancyCalculator from './components/Calculators/PregnancyCalculator';
+import DogAgeCalculator from './components/Calculators/DogAgeCalculator';
+import CatAgeCalculator from './components/Calculators/CatAgeCalculator';
 
 interface AgeResult {
   years: number;
@@ -51,8 +63,11 @@ const calculatorTools = [
   { name: 'Grade Calculator', id: 'grade' },
   { name: 'Simple Interest Calculator', id: 'simple-interest' },
   { name: 'Compound Interest Calculator', id: 'compound-interest' },
-  { name: 'Currency Converter', id: 'currency' },
-  { name: 'Time Zone Converter', id: 'timezone' }
+  { name: 'Life Expectancy Calculator', id: 'life-expectancy' },
+  { name: 'Biological Age Calculator', id: 'biological-age' },
+  { name: 'Pregnancy Calculator', id: 'pregnancy' },
+  { name: 'Dog Age Calculator', id: 'dog-age' },
+  { name: 'Cat Age Calculator', id: 'cat-age' }
 ];
 
 const zodiacSigns = [
@@ -316,9 +331,10 @@ const TipCalculator = () => {
   );
 };
 
-function App() {
+const MainApp = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'calculators'>('home');
   const [selectedCalculator, setSelectedCalculator] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedDay, setSelectedDay] = useState('15');
   const [selectedMonth, setSelectedMonth] = useState('6');
   const [selectedYear, setSelectedYear] = useState('1990');
@@ -327,6 +343,8 @@ function App() {
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
   const [fadeOutTimeout, setFadeOutTimeout] = useState<NodeJS.Timeout | null>(null);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
+
+  const { user, userProfile } = useAuth();
 
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
   const months = [
@@ -351,10 +369,12 @@ function App() {
     if (dropdownTimeout) {
       clearTimeout(dropdownTimeout);
     }
-    const timeout = setTimeout(() => {
-      setShowCalculatorDropdown(true);
-    }, 200);
-    setDropdownTimeout(timeout);
+    if (!showCalculatorDropdown) {
+      const timeout = setTimeout(() => {
+        setShowCalculatorDropdown(true);
+      }, 200); // 0.2 second delay
+      setDropdownTimeout(timeout);
+    }
   };
 
   const handleDropdownLeave = () => {
@@ -389,6 +409,10 @@ function App() {
       setShowCalculatorDropdown(false);
     }, 1000);
     setFadeOutTimeout(fadeTimeout);
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
   const getZodiacSign = (month: number, day: number): string => {
@@ -505,6 +529,16 @@ function App() {
         return <SimpleInterestCalculator />;
       case 'compound-interest':
         return <CompoundInterestCalculator />;
+      case 'life-expectancy':
+        return <LifeExpectancyCalculator />;
+      case 'biological-age':
+        return <BiologicalAgeCalculator />;
+      case 'pregnancy':
+        return <PregnancyCalculator />;
+      case 'dog-age':
+        return <DogAgeCalculator />;
+      case 'cat-age':
+        return <CatAgeCalculator />;
       default:
         return (
           <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -608,43 +642,68 @@ function App() {
               <h1 className="text-xl font-bold text-white">Advanced Calculator Suite</h1>
             </div>
             
-            {/* Calculator Dropdown */}
-            <div className="relative">
-              <button
-                onMouseEnter={handleDropdownEnter}
-                onMouseLeave={handleDropdownLeave}
-                className="flex items-center space-x-2 px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
-              >
-                <Calculator className="w-5 h-5" />
-                <span>Calculators</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              
-              {showCalculatorDropdown && (
-                <div
-                  onMouseEnter={handleDropdownContentEnter}
-                  onMouseLeave={handleDropdownContentLeave}
-                  className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50 animate-fadeIn"
+            <div className="flex items-center space-x-4">
+              {/* Calculator Dropdown */}
+              <div className="relative">
+                <button
+                  onMouseEnter={handleDropdownEnter}
+                  onMouseLeave={handleDropdownLeave}
+                  className="flex items-center space-x-2 px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
                 >
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">Basic Math & Everyday Use</h3>
-                    <div className="grid grid-cols-1 gap-1">
-                      {calculatorTools.map((tool, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            setCurrentPage('calculators');
-                            setSelectedCalculator(tool.id);
-                            setShowCalculatorDropdown(false);
-                          }}
-                          className="text-left p-3 text-purple-200 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors text-sm"
-                        >
-                          {tool.name}
-                        </button>
-                      ))}
+                  <Calculator className="w-5 h-5" />
+                  <span>Calculators</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {showCalculatorDropdown && (
+                  <div
+                    onMouseEnter={handleDropdownContentEnter}
+                    onMouseLeave={handleDropdownContentLeave}
+                    className="absolute right-0 top-full mt-2 w-80 bg-purple-900/95 backdrop-blur-sm border border-purple-700/50 rounded-xl shadow-2xl z-50 animate-fadeIn"
+                  >
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4">All Calculators</h3>
+                      <div className="grid grid-cols-1 gap-1">
+                        {calculatorTools.map((tool, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setCurrentPage('calculators');
+                              setSelectedCalculator(tool.id);
+                              setShowCalculatorDropdown(false);
+                            }}
+                            className="text-left p-3 text-purple-200 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors text-sm"
+                          >
+                            {tool.name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+              </div>
+
+              {/* Admin Button */}
+              {userProfile?.role === 'admin' && (
+                <a
+                  href="/admin"
+                  className="flex items-center space-x-2 px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800 rounded-lg transition-colors"
+                >
+                  <Shield className="w-5 h-5" />
+                  <span>Admin</span>
+                </a>
+              )}
+
+              {/* Account Dropdown or Sign In */}
+              {user ? (
+                <AccountDropdown isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+              ) : (
+                <a
+                  href="/signin"
+                  className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                >
+                  Sign In
+                </a>
               )}
             </div>
           </div>
@@ -848,6 +907,22 @@ function App() {
         }
       `}</style>
     </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/" element={<MainApp />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
