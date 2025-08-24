@@ -16,6 +16,7 @@ export type Database = {
           avatar_url: string | null
           country: string | null
           role: 'user' | 'admin'
+          date_of_birth: string | null
           created_at: string
           updated_at: string
         }
@@ -26,6 +27,7 @@ export type Database = {
           avatar_url?: string | null
           country?: string | null
           role?: 'user' | 'admin'
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           avatar_url?: string | null
           country?: string | null
           role?: 'user' | 'admin'
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
