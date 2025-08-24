@@ -340,8 +340,8 @@ const MainApp = () => {
   const [selectedYear, setSelectedYear] = useState('1990');
   const [compareToAnother, setCompareToAnother] = useState(false);
   const [showCalculatorDropdown, setShowCalculatorDropdown] = useState(false);
-  const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [fadeOutTimeout, setFadeOutTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showTimeout, setShowTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [ageResult, setAgeResult] = useState<AgeResult | null>(null);
 
   const { user, userProfile } = useAuth();
@@ -366,49 +366,46 @@ const MainApp = () => {
   const years = Array.from({ length: 120 }, (_, i) => (currentYear - i).toString());
 
   const handleDropdownEnter = () => {
-    if (dropdownTimeout) {
-      clearTimeout(dropdownTimeout);
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      setHideTimeout(null);
     }
     if (!showCalculatorDropdown) {
       const timeout = setTimeout(() => {
         setShowCalculatorDropdown(true);
-      }, 200); // 0.2 second delay
-      setDropdownTimeout(timeout);
+      }, 200);
+      setShowTimeout(timeout);
     }
   };
 
   const handleDropdownLeave = () => {
-    if (dropdownTimeout) {
-      clearTimeout(dropdownTimeout);
-      setDropdownTimeout(null);
+    if (showTimeout) {
+      clearTimeout(showTimeout);
+      setShowTimeout(null);
     }
-    
-    // Add 1 second delay before hiding dropdown
-    const fadeTimeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShowCalculatorDropdown(false);
     }, 1000);
-    setFadeOutTimeout(fadeTimeout);
+    setHideTimeout(timeout);
   };
 
   const handleDropdownContentEnter = () => {
-    // Clear both timeouts when entering dropdown content
-    if (dropdownTimeout) {
-      clearTimeout(dropdownTimeout);
-      setDropdownTimeout(null);
+    if (showTimeout) {
+      clearTimeout(showTimeout);
+      setShowTimeout(null);
     }
-    if (fadeOutTimeout) {
-      clearTimeout(fadeOutTimeout);
-      setFadeOutTimeout(null);
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      setHideTimeout(null);
     }
     setShowCalculatorDropdown(true);
   };
 
   const handleDropdownContentLeave = () => {
-    // Add 1 second delay before hiding dropdown when leaving content
-    const fadeTimeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShowCalculatorDropdown(false);
     }, 1000);
-    setFadeOutTimeout(fadeTimeout);
+    setHideTimeout(timeout);
   };
 
   const toggleDarkMode = () => {
