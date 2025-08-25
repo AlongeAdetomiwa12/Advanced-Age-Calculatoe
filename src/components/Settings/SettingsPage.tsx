@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ArrowLeft, User, Settings as SettingsIcon, CreditCard, Smartphone, Cloud, BookOpen, Flask } from 'lucide-react'
+import { ArrowLeft, User, Settings as SettingsIcon, CreditCard, Smartphone, Cloud, BookOpen, FlaskRound as Flask } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
